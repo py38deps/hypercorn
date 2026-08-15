@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Generator
-from typing import cast
+from typing import Awaitable, Callable, cast, Generator
 
 import h11
 import pytest
@@ -17,7 +16,7 @@ from ..helpers import MockSocket
 try:
     from typing import TypeAlias
 except ImportError:
-    from typing import TypeAlias
+    from typing_extensions import TypeAlias
 
 
 KEEP_ALIVE_TIMEOUT = 0.01
@@ -57,7 +56,7 @@ async def slow_framework(
 @pytest.fixture(name="client_stream", scope="function")
 def _client_stream(
     nursery: trio.Nursery,
-) -> Generator[ClientStream]:
+) -> Generator[ClientStream, None, None]:
     config = Config()
     config.keep_alive_timeout = KEEP_ALIVE_TIMEOUT
     client_stream, server_stream = trio.testing.memory_stream_pair()

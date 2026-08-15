@@ -9,7 +9,7 @@ from multiprocessing.context import BaseContext
 from multiprocessing.process import BaseProcess
 from multiprocessing.synchronize import Event as EventType
 from pickle import PicklingError
-from typing import Any
+from typing import Any, List
 
 from .config import Config, Sockets
 from .typing import WorkerFunc
@@ -66,7 +66,7 @@ def run(config: Config) -> int:
             shutdown_event.set()
             active = False
 
-        processes: list[BaseProcess] = []
+        processes: List[BaseProcess] = []
         while active:
             # Ignore SIGINT before creating the processes, so that they
             # inherit the signal handling. This means that the shutdown
@@ -115,7 +115,7 @@ def run(config: Config) -> int:
 
 
 def _populate(
-    processes: list[BaseProcess],
+    processes: List[BaseProcess],
     config: Config,
     worker_func: WorkerFunc,
     sockets: Sockets,
@@ -139,7 +139,7 @@ def _populate(
             time.sleep(0.1)
 
 
-def _join_exited(processes: list[BaseProcess]) -> int:
+def _join_exited(processes: List[BaseProcess]) -> int:
     exitcode = 0
     for index in reversed(range(len(processes))):
         worker = processes[index]

@@ -5,10 +5,9 @@ import logging
 import os
 import sys
 import time
-from collections.abc import Mapping
 from http import HTTPStatus
 from logging.config import dictConfig, fileConfig
-from typing import Any, IO, TYPE_CHECKING
+from typing import Any, IO, Mapping, Optional, TYPE_CHECKING, Union
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -23,12 +22,12 @@ if TYPE_CHECKING:
 
 def _create_logger(
     name: str,
-    target: logging.Logger | str | None,
-    level: str | None,
+    target: Union[logging.Logger, str, None],
+    level: Optional[str],
     sys_default: IO,
     *,
     propagate: bool = True,
-) -> logging.Logger | None:
+) -> Optional[logging.Logger]:
     if isinstance(target, logging.Logger):
         return target
 
@@ -51,7 +50,7 @@ def _create_logger(
 
 
 class Logger:
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: "Config") -> None:
         self.access_log_format = config.access_log_format
 
         self.access_logger = _create_logger(
@@ -83,7 +82,7 @@ class Logger:
                 dictConfig(config.logconfig_dict)
 
     async def access(
-        self, request: WWWScope, response: ResponseSummary, request_time: float
+        self, request: "WWWScope", response: "ResponseSummary", request_time: float
     ) -> None:
         if self.access_logger is not None:
             self.access_logger.info(
@@ -119,7 +118,7 @@ class Logger:
             self.error_logger.log(level, message, *args, **kwargs)
 
     def atoms(
-        self, request: WWWScope, response: ResponseSummary | None, request_time: float
+        self, request: "WWWScope", response: Optional["ResponseSummary"], request_time: float
     ) -> Mapping[str, str]:
         """Create and return an access log atoms dictionary.
 
@@ -134,7 +133,7 @@ class Logger:
 
 class AccessLogAtoms(dict):
     def __init__(
-        self, request: WWWScope, response: ResponseSummary | None, request_time: float
+        self, request: "WWWScope", response: Optional["ResponseSummary"], request_time: float
     ) -> None:
         for name, value in request["headers"]:
             self[f"{{{name.decode('latin1').lower()}}}i"] = value.decode("latin1")

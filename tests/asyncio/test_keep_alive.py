@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncGenerator
+from typing import AsyncGenerator
 
 import h11
 import pytest
@@ -43,7 +43,7 @@ async def slow_framework(
 
 
 @pytest_asyncio.fixture(name="server", scope="function")  # type: ignore[misc]
-async def _server() -> AsyncGenerator[TCPServer]:
+async def _server() -> AsyncGenerator[TCPServer, None]:
     event_loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
 
     config = Config()

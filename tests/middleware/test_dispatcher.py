@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import cast
+from typing import Callable, cast
 
 import pytest
 

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from itertools import chain
-from typing import cast
+from typing import Awaitable, Callable, cast, Optional, Tuple, Type, Union
 
 import h11
 
@@ -63,7 +62,7 @@ class H11WSConnection:
     def receive_data(self, data: bytes) -> None:
         self.buffer.extend(data)
 
-    def next_event(self) -> Data | type[h11.NEED_DATA]:
+    def next_event(self) -> Union[Data, Type[h11.NEED_DATA]]:
         if self.buffer:
             event = Data(stream_id=STREAM_ID, data=bytes(self.buffer))
             self.buffer = bytearray()
@@ -87,15 +86,15 @@ class H11Protocol:
         task_group: TaskGroup,
         connection_state: ConnectionState,
         ssl: bool,
-        client: tuple[str, int] | None,
-        server: tuple[str, int] | None,
+        client: Optional[Tuple[str, int]],
+        server: Optional[Tuple[str, int]],
         send: Callable[[Event], Awaitable[None]],
     ) -> None:
         self.app = app
         self.can_read = context.event_class()
         self.client = client
         self.config = config
-        self.connection: h11.Connection | H11WSConnection = h11.Connection(
+        self.connection: Union[h11.Connection, H11WSConnection] = h11.Connection(
             h11.SERVER, max_incomplete_event_size=self.config.h11_max_incomplete_size
         )
         self.context = context
@@ -103,7 +102,7 @@ class H11Protocol:
         self.send = send
         self.server = server
         self.ssl = ssl
-        self.stream: HTTPStream | WSStream | None = None
+        self.stream: Optional[Union[HTTPStream, WSStream]] = None
         self.task_group = task_group
         self.connection_state = connection_state
 

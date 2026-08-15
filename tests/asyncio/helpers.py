@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Optional, Union
 
 from ..helpers import MockSocket
 
@@ -36,7 +37,7 @@ class MemoryWriter:
         self.data: asyncio.Queue = asyncio.Queue()
         self.http2 = http2
 
-    def get_extra_info(self, name: str) -> MockSocket | MockSSLObject | None:
+    def get_extra_info(self, name: str) -> Optional[Union[MockSocket, MockSSLObject]]:
         if name == "socket":
             return MockSocket()
         elif self.http2 and name == "ssl_object":

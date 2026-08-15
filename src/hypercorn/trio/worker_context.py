@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from functools import wraps
+from typing import Awaitable, Callable, Optional, Type, Union
 
 import trio
 
@@ -23,7 +23,7 @@ def _cancel_wrapper(func: Callable[[], Awaitable[None]]) -> Callable[[], Awaitab
 
 class TrioSingleTask:
     def __init__(self) -> None:
-        self._handle: trio.CancelScope | None = None
+        self._handle: Optional[trio.CancelScope] = None
         self._lock = trio.Lock()
 
     async def restart(self, task_group: TaskGroup, action: Callable) -> None:
@@ -57,10 +57,10 @@ class EventWrapper:
 
 
 class WorkerContext:
-    event_class: type[Event] = EventWrapper
-    single_task_class: type[SingleTask] = TrioSingleTask
+    event_class: Type[Event] = EventWrapper
+    single_task_class: Type[SingleTask] = TrioSingleTask
 
-    def __init__(self, max_requests: int | None) -> None:
+    def __init__(self, max_requests: Optional[int]) -> None:
         self.max_requests = max_requests
         self.requests = 0
         self.terminate = self.event_class()
@@ -75,7 +75,7 @@ class WorkerContext:
             await self.terminate.set()
 
     @staticmethod
-    async def sleep(wait: float | int) -> None:
+    async def sleep(wait: Union[float, int]) -> None:
         return await trio.sleep(wait)
 
     @staticmethod

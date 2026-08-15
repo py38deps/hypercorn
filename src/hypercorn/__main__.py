@@ -4,6 +4,7 @@ import argparse
 import ssl
 import sys
 import warnings
+from typing import List, Optional
 
 from .config import Config
 from .run import run
@@ -11,7 +12,7 @@ from .run import run
 sentinel = object()
 
 
-def _load_config(config_path: str | None) -> Config:
+def _load_config(config_path: Optional[str]) -> Config:
     if config_path is None:
         return Config()
     elif config_path.startswith("python:"):
@@ -22,7 +23,7 @@ def _load_config(config_path: str | None) -> Config:
         return Config.from_toml(config_path)
 
 
-def main(sys_args: list[str] | None = None) -> int:
+def main(sys_args: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "application", help="The application to dispatch to as path.to.module:instance.path"

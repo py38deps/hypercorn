@@ -4,12 +4,23 @@ import inspect
 import os
 import socket
 import sys
-from collections.abc import Awaitable, Callable, Iterable
 from enum import Enum
 from importlib import import_module
 from multiprocessing.synchronize import Event as EventType
 from pathlib import Path
-from typing import Any, cast, Literal, TYPE_CHECKING
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    cast,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TYPE_CHECKING,
+)
 
 from .app_wrappers import ASGIWrapper, WSGIWrapper
 from .config import Config
@@ -53,9 +64,9 @@ def suppress_body(method: str, status_code: int) -> bool:
     return method == "HEAD" or 100 <= status_code < 200 or status_code in {204, 304}
 
 
-def build_and_validate_headers(headers: Iterable[tuple[bytes, bytes]]) -> list[tuple[bytes, bytes]]:
+def build_and_validate_headers(headers: Iterable[Tuple[bytes, bytes]]) -> List[Tuple[bytes, bytes]]:
     # Validates that the header name and value are bytes
-    validated_headers: list[tuple[bytes, bytes]] = []
+    validated_headers: List[Tuple[bytes, bytes]] = []
     for name, value in headers:
         if name[0] == b":"[0]:
             raise ValueError("Pseudo headers are not valid")
@@ -63,8 +74,8 @@ def build_and_validate_headers(headers: Iterable[tuple[bytes, bytes]]) -> list[t
     return validated_headers
 
 
-def filter_pseudo_headers(headers: list[tuple[bytes, bytes]]) -> list[tuple[bytes, bytes]]:
-    filtered_headers: list[tuple[bytes, bytes]] = [(b"host", b"")]  # Placeholder
+def filter_pseudo_headers(headers: List[Tuple[bytes, bytes]]) -> List[Tuple[bytes, bytes]]:
+    filtered_headers: List[Tuple[bytes, bytes]] = [(b"host", b"")]  # Placeholder
     authority = None
     host = b""
     for name, value in headers:
@@ -79,7 +90,7 @@ def filter_pseudo_headers(headers: list[tuple[bytes, bytes]]) -> list[tuple[byte
 
 
 def load_application(path: str, wsgi_max_body_size: int) -> AppWrapper:
-    mode: Literal["asgi", "wsgi"] | None = None
+    mode: Optional[Literal["asgi", "wsgi"]] = None
     if ":" not in path:
         module_name, app_name = path, "app"
     elif path.count(":") == 2:
@@ -111,7 +122,7 @@ def load_application(path: str, wsgi_max_body_size: int) -> AppWrapper:
 
 
 def wrap_app(
-    app: Framework, wsgi_max_body_size: int, mode: Literal["asgi", "wsgi"] | None
+    app: Framework, wsgi_max_body_size: int, mode: Optional[Literal["asgi", "wsgi"]]
 ) -> AppWrapper:
     if mode is None:
         mode = "asgi" if is_asgi(app) else "wsgi"
@@ -121,8 +132,8 @@ def wrap_app(
         return WSGIWrapper(cast(WSGIFramework, app), wsgi_max_body_size)
 
 
-def files_to_watch() -> dict[Path, float]:
-    last_updates: dict[Path, float] = {}
+def files_to_watch() -> Dict[Path, float]:
+    last_updates: Dict[Path, float] = {}
     for module in list(sys.modules.values()):
         filename = getattr(module, "__file__", None)
         if filename is None:
@@ -135,7 +146,7 @@ def files_to_watch() -> dict[Path, float]:
     return last_updates
 
 
-def check_for_updates(files: dict[Path, float]) -> bool:
+def check_for_updates(files: Dict[Path, float]) -> bool:
     for path, last_mtime in files.items():
         try:
             mtime = path.stat().st_mtime
@@ -168,7 +179,7 @@ def write_pid_file(pid_path: str) -> None:
         file_.write(f"{os.getpid()}")
 
 
-def parse_socket_addr(family: int, address: tuple) -> tuple[str, int] | None:
+def parse_socket_addr(family: int, address: tuple) -> Optional[Tuple[str, int]]:
     if family == socket.AF_INET:
         return address
     elif family == socket.AF_INET6:
@@ -188,7 +199,7 @@ def repr_socket_addr(family: int, address: tuple) -> str:
         return f"{address}"
 
 
-def valid_server_name(config: Config, request: Request) -> bool:
+def valid_server_name(config: Config, request: "Request") -> bool:
     if len(config.server_names) == 0:
         return True
 

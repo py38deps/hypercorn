@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
 from copy import deepcopy
-from typing import Literal
+from typing import Callable, Iterable, Literal, Optional, Tuple
 
 from ..typing import ASGIFramework, Scope
 
@@ -23,9 +22,9 @@ class ProxyFixMiddleware:
         if scope["type"] == "http" or scope["type"] == "websocket":
             scope = deepcopy(scope)
             headers = scope["headers"]
-            client: str | None = None
-            scheme: str | None = None
-            host: str | None = None
+            client: Optional[str] = None
+            scheme: Optional[str] = None
+            host: Optional[str] = None
 
             if (
                 self.mode == "modern"
@@ -64,8 +63,8 @@ class ProxyFixMiddleware:
 
 
 def _get_trusted_value(
-    name: bytes, headers: Iterable[tuple[bytes, bytes]], trusted_hops: int
-) -> str | None:
+    name: bytes, headers: Iterable[Tuple[bytes, bytes]], trusted_hops: int
+) -> Optional[str]:
     if trusted_hops == 0:
         return None
 

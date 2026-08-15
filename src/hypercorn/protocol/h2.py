@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from typing import Awaitable, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import h2
 import h2.connection
@@ -36,7 +36,7 @@ class BufferCompleteError(Exception):
 
 
 class StreamBuffer:
-    def __init__(self, event_class: type[IOEvent]) -> None:
+    def __init__(self, event_class: Type[IOEvent]) -> None:
         self.buffer = bytearray()
         self._complete = False
         self._is_empty = event_class()
@@ -87,8 +87,8 @@ class H2Protocol:
         task_group: TaskGroup,
         connection_state: ConnectionState,
         ssl: bool,
-        client: tuple[str, int] | None,
-        server: tuple[str, int] | None,
+        client: Optional[Tuple[str, int]],
+        server: Optional[Tuple[str, int]],
         send: Callable[[Event], Awaitable[None]],
     ) -> None:
         self.app = app
@@ -116,18 +116,18 @@ class H2Protocol:
         self.send = send
         self.server = server
         self.ssl = ssl
-        self.streams: dict[int, HTTPStream | WSStream] = {}
+        self.streams: Dict[int, Union[HTTPStream, WSStream]] = {}
         # The below are used by the sending task
         self.has_data = self.context.event_class()
         self.priority = priority.PriorityTree()
-        self.stream_buffers: dict[int, StreamBuffer] = {}
+        self.stream_buffers: Dict[int, StreamBuffer] = {}
 
     @property
     def idle(self) -> bool:
         return len(self.streams) == 0 or all(stream.idle for stream in self.streams.values())
 
     async def initiate(
-        self, headers: list[tuple[bytes, bytes]] | None = None, settings: bytes | None = None
+        self, headers: Optional[List[Tuple[bytes, bytes]]] = None, settings: Optional[bytes] = None
     ) -> None:
         if settings is not None:
             self.connection.initiate_upgrade_connection(settings)
@@ -241,7 +241,7 @@ class H2Protocol:
             # connection has advanced ahead of the last emitted event.
             return
 
-    async def _handle_events(self, events: list[h2.events.Event]) -> None:
+    async def _handle_events(self, events: List[h2.events.Event]) -> None:
         for event in events:
             if isinstance(event, h2.events.RequestReceived):
                 if self.context.terminated.is_set():
@@ -288,7 +288,7 @@ class H2Protocol:
         if data != b"":
             await self.send(RawData(data=data))
 
-    async def _window_updated(self, stream_id: int | None) -> None:
+    async def _window_updated(self, stream_id: Optional[int]) -> None:
         if stream_id is None or stream_id == 0:
             # Unblock all streams
             for stream_id in list(self.stream_buffers.keys()):
@@ -370,7 +370,7 @@ class H2Protocol:
         await self.context.mark_request()
 
     async def _create_server_push(
-        self, stream_id: int, path: bytes, headers: list[tuple[bytes, bytes]]
+        self, stream_id: int, path: bytes, headers: List[Tuple[bytes, bytes]]
     ) -> None:
         push_stream_id = self.connection.get_next_available_stream_id()
         request_headers = [(b":method", b"GET"), (b":path", path)]

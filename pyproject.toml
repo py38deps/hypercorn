@@ -13,6 +13,8 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -36,7 +38,7 @@ dependencies = [
     "wsproto >= 0.14.0"
 ]
 documentation = "https://hypercorn.readthedocs.io"
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 
 [project.optional-dependencies]
 docs = ["pydata_sphinx_theme", "sphinxcontrib_mermaid"]
@@ -60,7 +62,7 @@ hypercorn = "hypercorn.__main__:main"
 
 [tool.black]
 line-length = 100
-target-version = ["py310"]
+target-version = ["py38"]
 
 [tool.isort]
 combine_as_imports = true

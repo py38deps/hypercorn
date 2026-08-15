@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Callable
 from functools import partial
 from io import BytesIO
+from typing import Callable, List, Optional, Tuple
 
 from .typing import (
     ASGIFramework,
@@ -84,14 +84,14 @@ class WSGIWrapper:
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 
     def run_app(self, environ: dict, send: Callable) -> None:
-        headers: list[tuple[bytes, bytes]]
+        headers: List[Tuple[bytes, bytes]]
         response_started = False
-        status_code: int | None = None
+        status_code: Optional[int] = None
 
         def start_response(
             status: str,
-            response_headers: list[tuple[str, str]],
-            exc_info: Exception | None = None,
+            response_headers: List[Tuple[str, str]],
+            exc_info: Optional[Exception] = None,
         ) -> None:
             nonlocal headers, response_started, status_code
 

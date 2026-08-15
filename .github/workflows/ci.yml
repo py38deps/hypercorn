@@ -27,6 +27,8 @@ jobs:
           - {name: '3.12', python: '3.12', tox: py312}
           - {name: '3.11', python: '3.11', tox: py311}
           - {name: '3.10', python: '3.10', tox: py310}
+          - {name: '3.9', python: '3.9', tox: py39}
+          - {name: '3.8', python: '3.8', tox: py38}
           - {name: 'format', python: '3.14', tox: format}
           - {name: 'mypy', python: '3.14', tox: mypy}
           - {name: 'pep8', python: '3.14', tox: pep8}
@@ -36,6 +38,13 @@ jobs:
       - uses: pgjones/actions/tox@dbbee601c084d000c4fc711d4b27cb306e15ead1 # v1
         with:
           environment: ${{ matrix.tox }}
+
+      - name: Upload dist
+        if: matrix.tox == 'package'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
 
   h2spec:

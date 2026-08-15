@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
 from functools import partial
 from types import TracebackType
-from typing import Any
+from typing import Any, Awaitable, Callable, Optional
 
 from ..config import Config
 from ..typing import AppWrapper, ASGIReceiveCallable, ASGIReceiveEvent, ASGISendEvent, Scope
@@ -20,7 +19,7 @@ async def _handle(
     config: Config,
     scope: Scope,
     receive: ASGIReceiveCallable,
-    send: Callable[[ASGISendEvent | None], Awaitable[None]],
+    send: Callable[[Optional[ASGISendEvent]], Awaitable[None]],
     sync_spawn: Callable,
     call_soon: Callable,
 ) -> None:
@@ -44,7 +43,7 @@ class TaskGroup:
         app: AppWrapper,
         config: Config,
         scope: Scope,
-        send: Callable[[ASGISendEvent | None], Awaitable[None]],
+        send: Callable[[Optional[ASGISendEvent]], Awaitable[None]],
     ) -> Callable[[ASGIReceiveEvent], Awaitable[None]]:
         app_queue: asyncio.Queue[ASGIReceiveEvent] = asyncio.Queue(config.max_app_queue_size)
 
@@ -67,7 +66,7 @@ class TaskGroup:
     def spawn(self, func: Callable, *args: Any) -> None:
         self._task_group.create_task(func(*args))
 
-    async def __aenter__(self) -> TaskGroup:
+    async def __aenter__(self) -> "TaskGroup":
         await self._task_group.__aenter__()
         return self
 

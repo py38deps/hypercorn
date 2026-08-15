@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
 from functools import partial
-from typing import Any
+from typing import Any, Callable, List
 
 import pytest
 import trio
@@ -12,7 +11,7 @@ from hypercorn.app_wrappers import _build_environ, InvalidPathError, WSGIWrapper
 from hypercorn.typing import ASGIReceiveEvent, ASGISendEvent, ConnectionState, HTTPScope
 
 
-def echo_body(environ: dict, start_response: Callable) -> list[bytes]:
+def echo_body(environ: dict, start_response: Callable) -> List[bytes]:
     status = "200 OK"
     output = environ["wsgi.input"].read()
     headers = [
@@ -62,7 +61,7 @@ async def test_wsgi_trio() -> None:
     ]
 
 
-async def _run_app(app: WSGIWrapper, scope: HTTPScope, body: bytes = b"") -> list[ASGISendEvent]:
+async def _run_app(app: WSGIWrapper, scope: HTTPScope, body: bytes = b"") -> List[ASGISendEvent]:
     queue: asyncio.Queue = asyncio.Queue()
     await queue.put({"type": "http.request", "body": body})
 
@@ -138,7 +137,7 @@ async def test_max_body_size() -> None:
     ]
 
 
-def no_start_response(environ: dict, start_response: Callable) -> list[bytes]:
+def no_start_response(environ: dict, start_response: Callable) -> List[bytes]:
     return [b"result"]
 
 

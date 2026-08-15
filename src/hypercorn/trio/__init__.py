@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from collections.abc import Awaitable, Callable
-from typing import Literal
+from typing import Awaitable, Callable, Literal, Optional
 
 import trio
 
@@ -16,9 +15,9 @@ async def serve(
     app: Framework,
     config: Config,
     *,
-    shutdown_trigger: Callable[..., Awaitable[None]] | None = None,
+    shutdown_trigger: Optional[Callable[..., Awaitable[None]]] = None,
     task_status: trio.TaskStatus[list[str]] = trio.TASK_STATUS_IGNORED,
-    mode: Literal["asgi", "wsgi"] | None = None,
+    mode: Optional[Literal["asgi", "wsgi"]] = None,
 ) -> None:
     """Serve an ASGI framework app given the config.
 

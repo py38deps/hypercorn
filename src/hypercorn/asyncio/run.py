@@ -5,13 +5,12 @@ import platform
 import signal
 import ssl
 import sys
-from collections.abc import Awaitable, Callable
 from functools import partial
 from multiprocessing.synchronize import Event as EventType
 from os import getpid
 from random import randint
 from socket import socket
-from typing import Any
+from typing import Any, Awaitable, Callable, Optional, Set
 
 from .lifespan import Lifespan
 from .statsd import StatsdLogger
@@ -55,8 +54,8 @@ async def worker_serve(
     app: AppWrapper,
     config: Config,
     *,
-    sockets: Sockets | None = None,
-    shutdown_trigger: Callable[..., Awaitable] | None = None,
+    sockets: Optional[Sockets] = None,
+    shutdown_trigger: Optional[Callable[..., Awaitable]] = None,
 ) -> None:
     config.set_statsd_logger_class(StatsdLogger)
 
@@ -100,7 +99,7 @@ async def worker_serve(
     if config.max_requests is not None:
         max_requests = config.max_requests + randint(0, config.max_requests_jitter)
     context = WorkerContext(max_requests)
-    server_tasks: set[asyncio.Task] = set()
+    server_tasks: Set[asyncio.Task] = set()
 
     async def _server_callback(reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
         task = asyncio.current_task(loop)
@@ -181,7 +180,7 @@ async def worker_serve(
 
 
 def asyncio_worker(
-    config: Config, sockets: Sockets | None = None, shutdown_event: EventType | None = None
+    config: Config, sockets: Optional[Sockets] = None, shutdown_event: Optional[EventType] = None
 ) -> None:
     app = load_application(config.application_path, config.wsgi_max_body_size)
 
@@ -200,7 +199,7 @@ def asyncio_worker(
 
 
 def uvloop_worker(
-    config: Config, sockets: Sockets | None = None, shutdown_event: EventType | None = None
+    config: Config, sockets: Optional[Sockets] = None, shutdown_event: Optional[EventType] = None
 ) -> None:
     try:
         import uvloop
@@ -225,7 +224,7 @@ def _run(
     main: Callable,
     *,
     debug: bool = False,
-    shutdown_trigger: Callable[..., Awaitable[None]] | None = None,
+    shutdown_trigger: Optional[Callable[..., Awaitable[None]]] = None,
     loop_factory: Callable[[], asyncio.AbstractEventLoop] | None = None,
 ) -> None:
     with Runner(debug=debug, loop_factory=loop_factory) as runner:

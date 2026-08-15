@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, cast
+from typing import Any, cast, List, Tuple
 from unittest.mock import AsyncMock, call, Mock
 
 import pytest
@@ -105,7 +105,7 @@ def test_buffer_mixed_types(data: list) -> None:
     ],
 )
 def test_handshake_validity(
-    headers: list[tuple[bytes, bytes]], http_version: str, valid: bool
+    headers: List[Tuple[bytes, bytes]], http_version: str, valid: bool
 ) -> None:
     handshake = Handshake(headers, http_version)
     assert handshake.is_valid() is valid
