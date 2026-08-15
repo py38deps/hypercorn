@@ -159,8 +159,8 @@ class AccessLogAtoms(dict):
         status_code = "-"
         status_phrase = "-"
         if response is not None:
-            for name, value in response.get("headers", []):  # type: ignore
-                self[f"{{{name.decode('latin1').lower()}}}o"] = value.decode("latin1")  # type: ignore # noqa: E501
+            for name, value in response.get("headers", []):
+                self[f"{{{name.decode('latin1').lower()}}}o"] = value.decode("latin1")  # noqa: E501
             status_code = str(response["status"])
             try:
                 status_phrase = HTTPStatus(response["status"]).phrase

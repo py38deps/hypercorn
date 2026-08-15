@@ -29,7 +29,7 @@ from hypercorn.typing import (
 from hypercorn.utils import UnexpectedMessageError
 
 
-@pytest_asyncio.fixture(name="stream")  # type: ignore[misc]
+@pytest_asyncio.fixture(name="stream")
 async def _stream() -> HTTPStream:
     stream = HTTPStream(
         AsyncMock(), Config(), WorkerContext(None), AsyncMock(), False, None, None, AsyncMock(), 1

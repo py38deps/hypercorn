@@ -98,7 +98,7 @@ async def test_http1_keep_alive(
     while True:
         event = client.next_event()
         if event == h11.NEED_DATA:
-            data = await client_stream.receive_some(2**16)
+            data = bytes(await client_stream.receive_some(2**16))
             client.receive_data(data)
         elif isinstance(event, h11.EndOfMessage):
             break

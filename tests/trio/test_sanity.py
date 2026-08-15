@@ -81,7 +81,7 @@ async def test_http1_websocket(nursery: trio._core._run.Nursery) -> None:
     nursery.start_soon(server.run)
     client = wsproto.WSConnection(wsproto.ConnectionType.CLIENT)
     await client_stream.send_all(client.send(wsproto.events.Request(host="hypercorn", target="/")))
-    client.receive_data(await client_stream.receive_some(1024))
+    client.receive_data(bytes(await client_stream.receive_some(1024)))
     assert list(client.events()) == [
         wsproto.events.AcceptConnection(
             extra_headers=[
@@ -91,10 +91,10 @@ async def test_http1_websocket(nursery: trio._core._run.Nursery) -> None:
         )
     ]
     await client_stream.send_all(client.send(wsproto.events.BytesMessage(data=SANITY_BODY)))
-    client.receive_data(await client_stream.receive_some(1024))
+    client.receive_data(bytes(await client_stream.receive_some(1024)))
     assert list(client.events()) == [wsproto.events.TextMessage(data="Hello & Goodbye")]
     await client_stream.send_all(client.send(wsproto.events.CloseConnection(code=1000)))
-    client.receive_data(await client_stream.receive_some(1024))
+    client.receive_data(bytes(await client_stream.receive_some(1024)))
     assert list(client.events()) == [wsproto.events.CloseConnection(code=1000, reason="")]
 
 
